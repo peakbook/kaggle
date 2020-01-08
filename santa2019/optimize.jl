@@ -85,20 +85,6 @@ function cost_func(m_assign::Array{Int64})
   return penalty
 end
 
-function sampling()
-  dist = Categorical([1/N_DAYS for i in 1:N_DAYS])
-  occupancy = zeros(Int64, N_DAYS)
-  x = zeros(Int64, N_FAMILIES)
-  for i in randperm(N_FAMILIES)
-    x[i] = rand(dist)
-    occupancy[x[i]] += M_NPEOPLE[i]
-    p = exp.(MAX_OCCUPANCY .- occupancy)
-    p /= sum(p)
-    dist = Categorical(p)
-  end
-  return x
-end
-
 function init()
   rand(1:N_DAYS, N_FAMILIES)
 end
@@ -135,7 +121,7 @@ function main(args)
   # optimize the day assignment by using Artificial Bee Colony algorithm
   if isnothing(args["--resume"])
     N = parse(Int64, args["--n"])
-    abc = ABC(N, sampling, target)
+    abc = ABC(N, init, target)
   else
     @load args["--resume"] abc
     N = length(abc)
